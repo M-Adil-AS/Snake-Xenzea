@@ -1,0 +1,37 @@
+#container{
+    background-color: black;
+    position: absolute;
+    margin: auto;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    height:640px;
+    width:1480px;
+}
+
+#food{
+    position: absolute;
+    background-color: white;
+    border:5px solid lawngreen;
+    border-radius: 50%;
+    width:30px;
+    height:30px;
+}
+
+#scoreText, #score{
+    text-align: center;
+    font-size:4vmin;
+}
+
+#snake{
+    position: absolute;
+}
+
+.box{
+    background-color: white;
+    border:5px solid red ;
+    width:30px;
+    height:30px;
+    position: absolute;
+}
