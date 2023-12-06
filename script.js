@@ -1,4 +1,5 @@
 let direction 
+let prev_direction
 let foodX
 let foodY 
 let isChangingDirection = false
@@ -11,19 +12,26 @@ let movement = setInterval(move, currentInterval)
 
 document.addEventListener('keydown',(e)=>{
     if(!isChangingDirection){
-        if(e.key=='ArrowRight' && direction!='left'){
+        if(e.key=='ArrowRight' && direction!='left' && direction!='right'){
+            prev_direction = direction
             direction = 'right'
+            isChangingDirection = true
         }
-        else if(e.key=='ArrowLeft' && direction!='right'){
+        else if(e.key=='ArrowLeft' && direction!='right' && direction!='left'){
+            prev_direction = direction
             direction = 'left'
+            isChangingDirection = true
         }
-        else if(e.key=='ArrowUp' && direction!='down'){
+        else if(e.key=='ArrowUp' && direction!='down' && direction!='up'){
+            prev_direction = direction
             direction = 'up'
+            isChangingDirection = true
         }
-        else if(e.key=='ArrowDown' && direction!='up'){
+        else if(e.key=='ArrowDown' && direction!='up' && direction!='down'){
+            prev_direction = direction
             direction = 'down'
-        }
-        isChangingDirection = true
+            isChangingDirection = true
+        }       
     }
 })
 
@@ -38,14 +46,23 @@ function initialize(){
 
     for(let i=0; i<5; i++){
         let style = `margin-left: 0px; margin-top: ${i*40}px;`
-        document.querySelector('#snake').insertAdjacentHTML('beforeend',`<div class='box' style='${style}'></div>`)
+        let src = i==0 ? `head ${direction}.png` : i==4 ? `tail ${direction}.png` : "vertical.png"
+
+        document.querySelector('#snake').insertAdjacentHTML('beforeend',`<img src='${src}' class='snakeBox' style='${style}'>`)
     }
 }
 
 function move(){
-    document.querySelector('#snake').insertAdjacentHTML('afterbegin', `<div class='box'></div>`)
-    getBoxes()[0].style.marginLeft = `${marginLeft(getBoxes()[1])}px`
-    getBoxes()[0].style.marginTop = `${marginTop(getBoxes()[1])}px`
+    const tailX = marginLeft(getBoxes().slice(-1)[0])
+    const tailY = marginTop(getBoxes().slice(-1)[0])
+    const tailImage = getBoxes().slice(-1)[0].getAttribute('src')
+    const tailPredcessorImage = getBoxes()[getBoxes().length - 2].getAttribute('src')
+
+    for(let i = getBoxes().length - 1; i > 0; i--){
+        getBoxes()[i].style.marginLeft = `${marginLeft(getBoxes()[i-1])}px`
+        getBoxes()[i].style.marginTop = `${marginTop(getBoxes()[i-1])}px`
+        getBoxes()[i].src = getBoxes()[i-1].getAttribute('src')
+    }
     
     if(direction=='down'){
         getBoxes()[0].style.marginTop = marginTop(getBoxes()[0])==600 ? '0px' : `${marginTop(getBoxes()[0]) + 40}px`
@@ -60,7 +77,19 @@ function move(){
         getBoxes()[0].style.marginLeft = marginLeft(getBoxes()[0])==0 ? '1440px' : `${marginLeft(getBoxes()[0]) - 40}px`
     }
 
+    getBoxes()[0].src = `head ${direction}.png`
+    
+    if(isChangingDirection){
+        let turnImage = getTurnImage()
+        getBoxes()[1].src = turnImage
+    }
+    else{
+        getBoxes()[1].src = (direction=='up' || direction=='down') ? `vertical.png` : `horizontal.png`
+    }
+
     if(marginTop(getBoxes()[0])==foodY && marginLeft(getBoxes()[0])==foodX){
+        let style = `margin-left: ${tailX}px; margin-top: ${tailY}px;`
+        document.querySelector('#snake').insertAdjacentHTML('beforeend', `<img class='snakeBox' src='${tailImage}' style='${style}'>`)
         document.querySelector('#food').remove()
         food()
         document.querySelector('#score').innerHTML = Number(document.querySelector('#score').innerHTML) + 1
@@ -69,7 +98,15 @@ function move(){
         movement = setInterval(move, currentInterval)
     }
     else{
-        getBoxes()[getBoxes().length-1].remove()
+        if(tailPredcessorImage.includes('vertical') || tailPredcessorImage.includes('horizontal')){
+            getBoxes().slice(-1)[0].src = tailImage
+        }
+        else{
+            let tail_prevDirection = tailImage.split(' ')[1][0]
+            let tailPredcessorTurnFromIndex = tailPredcessorImage.indexOf(tail_prevDirection)
+            let tailPredcessorTurnTo = tailPredcessorImage[tailPredcessorTurnFromIndex + 2]
+            getBoxes().slice(-1)[0].src = `tail ${getFullForm(tailPredcessorTurnTo)}.png`
+        }
     }
 
     for(let i=1; i<=getBoxes().length-1; i++){
@@ -104,6 +141,13 @@ function food(){
     document.querySelector('#container').insertAdjacentHTML('beforeend',`<div id='food' style='${style}'></div>`)
 }
 
+function getTurnImage(){
+    let turnImages = ['ltu dtr.png', 'rtu dtl.png', 'utl rtd.png', 'utr ltd.png']
+    let currentTurn = `${prev_direction[0]}t${direction[0]}`
+    let currentTurnImage = turnImages.find(img => img.includes(currentTurn))
+    return currentTurnImage
+}
+
 function marginTop(box){
     return Number(box.style.marginTop.split('px')[0])
 }
@@ -112,6 +156,12 @@ function marginLeft(box){
     return Number(box.style.marginLeft.split('px')[0])
 }
 
+function getFullForm(alphabet){
+    let alphabets = ['u', 'r', 'd', 'l']
+    let directions = ['up', 'right', 'down', 'left']
+    return directions[alphabets.indexOf(alphabet)]
+}
+
 function getBoxes(){
-    return document.querySelectorAll('.box')
+    return Array.from(document.querySelectorAll('.snakeBox'))
 }
