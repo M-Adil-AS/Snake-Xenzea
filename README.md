@@ -7,4 +7,5 @@ Use Arrow keys to move the snake.
 
 Deployment Link: https://m-adil-as.github.io/Snake-Xenzia
 
-![SNAKE XENZEA](https://github.com/M-Adil-AS/Snake-Xenzea/assets/115668271/0f244d0a-1ed8-45af-baf5-791c888b2e76)
+![Xenzea1](https://github.com/M-Adil-AS/Snake-Xenzea/assets/115668271/6742802b-a4ab-4c2b-9928-03a4da3d264f)
+
